@@ -16,10 +16,11 @@ int main(void)
     if (data == -1)
       continue;
 
-    if(!t)
+    if (!t)
       t = new AVLTree<int>(data);
-    else
-      t->insert(data);
+
+    t->insert(data);
+
   } while (data != -1);
 
   t -> printTree();
