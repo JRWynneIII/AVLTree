@@ -36,7 +36,7 @@ public:
   {
     return this->getData() == rhs.getData();
   }
-
+  
   AVLTree<T> *getLeft()
   {
     return (AVLTree<T> *) BinaryTree<T>::getLeft();
@@ -62,13 +62,13 @@ public:
     AVLTree<T> *node = NULL;
     AVLTree<T> *p;
     node = new AVLTree<T>(data);
-    bstInsert(node);
+    bstInsert(node,this);
     
     AVLTree<T> *cur = node->getParent();
     while(cur)
     {
       p = cur->getParent();
-      rebalance(cur);
+    //  rebalance(cur);
       cur = p;
     }
 
@@ -88,36 +88,45 @@ public:
   }
   
 private:
-  void bstInsert(AVLTree<T> *node)
+  AVLTree<T> *currentParent;
+  void bstInsert(AVLTree<T> *node, AVLTree<T> *p)
   {
-    if(*node <= *this)
+    std::cout << "node: " << node->getData() << std::endl;
+    if (currentParent)
     {
-      lh++;
-      //if theres not a node on the left
-      if (!this->getLeft())
+      if(*node <= *p)
       {
-        //put one on the left
-        this->linkLeft(node);
-        std::cout << "lh: " << lh << "\t rh: " << rh << "\t" << "Linked on the left" <<std::endl;
+        //if theres not a node on the left
+        if (!p->getLeft())
+        {
+          lh++;
+          //put one on the left
+          p->linkLeft(node);
+          std::cout << "lh: " << lh << "\t rh: " << rh << "\t" << "Linked on the left" <<std::endl;
+        }
+        else 
+        {
+          //if there is, walk down to the left
+          bstInsert(node,p->getLeft());
+        }
       }
       else 
-        //if there is, walk down to the left
-        bstInsert(this->getLeft());
+      {
+        //if theres not one on the Right
+        if (!p->getRight())
+        {
+          rh++;
+          //put one on the right
+          p->linkRight(node);
+          std::cout << "lh: " << lh << "\t rh: " << rh << "\t" << "Linked on the right" <<std::endl;
+        }
+        else
+          //else walk down the right and try again
+          bstInsert(node,p->getRight());
+      }
     }
     else
-    {
-      rh++;
-      //if theres not one on the Right
-      if (!this->getRight())
-      {
-        //put one on the right
-        this->linkRight(node);
-        std::cout << "lh: " << lh << "\t rh: " << rh << "\t" << "Linked on the right" <<std::endl;
-      }
-      else
-        //else walk down the right and try again
-        bstInsert(this->getRight());
-    }
+      currentParent = node;
   }
 
   void rebalance(AVLTree<T> *node)
