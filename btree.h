@@ -79,10 +79,12 @@ public:
   {
     int lh=0, rh=0;
 
+    std::cout << lh << "\t "<< rh << std::endl;
     if(left)
       lh = left->getHeight();
     if(right)
       rh = right->getHeight();
+    std::cout << 1+(lh>rh?lh:rh) << std::endl;
     return 1+ (lh>rh?lh:rh);
   }
 

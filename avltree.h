@@ -68,7 +68,9 @@ public:
     while(cur)
     {
       p = cur->getParent();
-    //  rebalance(cur);
+      rebalance(cur);
+      if (p == NULL)
+        break;
       cur = p;
     }
 
@@ -88,21 +90,36 @@ public:
   }
   
 private:
-  AVLTree<T> *currentParent;
+  int getlh()
+  {
+    int lh=0;
+    AVLTree<T> *left = (AVLTree<T> *)this->left;
+
+    if(left)
+      lh = left->getlh();
+
+    return 1 + lh;
+  }
+
+  int getrh()
+  {
+    int rh=0;
+    AVLTree<T> *right = (AVLTree<T> *)this->right;
+
+    if(right)
+      rh = right->getrh();
+    return 1 + rh;
+  }
+
   void bstInsert(AVLTree<T> *node, AVLTree<T> *p)
   {
-    std::cout << "node: " << node->getData() << std::endl;
-    if (currentParent)
-    {
       if(*node <= *p)
       {
         //if theres not a node on the left
         if (!p->getLeft())
         {
-          lh++;
           //put one on the left
           p->linkLeft(node);
-          std::cout << "lh: " << lh << "\t rh: " << rh << "\t" << "Linked on the left" <<std::endl;
         }
         else 
         {
@@ -115,34 +132,29 @@ private:
         //if theres not one on the Right
         if (!p->getRight())
         {
-          rh++;
           //put one on the right
           p->linkRight(node);
-          std::cout << "lh: " << lh << "\t rh: " << rh << "\t" << "Linked on the right" <<std::endl;
         }
         else
           //else walk down the right and try again
           bstInsert(node,p->getRight());
       }
-    }
-    else
-      currentParent = node;
   }
 
   void rebalance(AVLTree<T> *node)
   {
-    int balance = (node->lh)-(node->rh);
+    int balance = (node->getlh())-(node->getrh());
     if (balance == -2)
     {
       AVLTree<T> *right = node->getRight();
-      if ((right->lh)-(right->rh) == 1)
+      if ((right->getlh())-(right->getrh()) == 1)
         rotateRight(right);
       rotateLeft(node);
     }
     else if (balance == 2)
     {
       AVLTree<T> *left = node->getLeft();
-      if ((left->lh) - (left->rh) == -1)
+      if ((left->getlh()) - (left->getrh()) == -1)
         rotateLeft(left);
       rotateRight(node);
     }
@@ -151,33 +163,60 @@ private:
   void rotateLeft(AVLTree<T> *node)
   {
     AVLTree<T> *p = node->getParent();
-    AVLTree<T> *node2 = (AVLTree<T> *) node->right;
-    AVLTree<T> *b = (AVLTree<T> *) node->left;
-    node2->linkLeft(node);
-    node->linkRight(b);
-    //fix p's link if p is not null
-    if (p != NULL)
+    AVLTree<T> *node2;
+    AVLTree<T> *b;
+    node2 = node->getRight();
+    b = node->getLeft();
+    if (b)
     {
-      node->linkLeft(p);      
+    node2->linkLeft(node);
+      node2->linkRight(b);
     }
-    rh--;
-    lh++;
+    //fix p's link if p is not null
+    if(p)
+    {
+       if (p->getRight() == node)
+       {
+        p->linkRight(node2);
+       }
+       else
+       {
+         p->linkLeft(node2);
+       }
+    }
+    else
+      node2->reparent(p);
+    std::cout << "Rotating Left\n";
   }
 
   void rotateRight(AVLTree<T> *node)
   {
+    std::cout << "Rotating Right\n";
     AVLTree<T> *p = node->getParent();
-    AVLTree<T> *node2 = (AVLTree<T> *) node->right;
-    AVLTree<T> *b = (AVLTree<T> *) node->left;
-    node2->linkRight(node);
-    node->linkLeft(b);
-    //fix p's link if p is not null
-    if (p != NULL)
+    AVLTree<T> *node2 =  node->getLeft();
+    AVLTree<T> *b = node->getRight();
+    node2 = node->getLeft();
+    b = node->getRight();
+    if (b)
     {
-      node->linkRight(p);      
+    node2->linkRight(node);
+      node2->linkLeft(b);
     }
-    lh--;
-    rh++;
+    
+    //fix p's link if p is not null
+    if(p)
+    {
+       if (p->getLeft() == node)
+       {
+         p->linkLeft(node2);
+       }
+       else
+       {
+         p->linkRight(node2);
+       }
+    }
+    else
+      node2->reparent(p);
   }
 
   int lh;

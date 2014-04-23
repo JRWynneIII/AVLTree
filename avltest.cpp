@@ -18,8 +18,8 @@ int main(void)
 
     if (!t)
       t = new AVLTree<int>(data);
-
-    t->insert(data);
+    else
+      t->insert(data);
 
   } while (data != -1);
 
